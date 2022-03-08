@@ -1,34 +1,42 @@
-from flask import Flask
+from flask import Flask, render_template
+from flask_bootstrap import Bootstrap
+from flask_nav import Nav
+from flask_nav.elements import *
+from dominate.tags import img
 
-# print a nice greeting.
-def say_hello(username = "World"):
-    return '<p>Hello %s!</p>\n' % username
+logo = img(src='./static/img/SkyHigh_Memes.png', height="50", style="margin-top:-15px")
+topbar = Navbar(View(logo, 'home'),
+                View('Home', 'home'),
+                View('Make a Meme', 'create_meme'),
+                View('Subscriptions', 'get_subscriptions'),
+                View('Sign up / Log in', 'handle_account'),
+                )
 
-# some bits of text for the page.
-header_text = '''
-    <html>\n<head> <title>TEST TEST TEST</title> </head>\n<body>'''
-instructions = '''
-    <p><em>Hint</em>: This is a RESTful web service! Append a username
-    to the URL (for example: <code>/Thelonious</code>) to say hello to
-    someone specific.</p>\n'''
-home_link = '<p><a href="/">Back</a></p>\n'
-footer_text = '</body>\n</html>'
+# registers the "top" menubar
+nav = Nav()
+nav.register_element('top', topbar)
 
-# EB looks for an 'application' callable by default.
-application = Flask(__name__)
+app = Flask(__name__)
+Bootstrap(app)
 
-# add a rule for the index page.
-application.add_url_rule('/', 'index', (lambda: header_text +
-    say_hello() + instructions + footer_text))
 
-# add a rule when the page is accessed with a name appended to the site
-# URL.
-application.add_url_rule('/<username>', 'hello', (lambda username:
-    header_text + say_hello(username) + home_link + footer_text))
+@app.route('/', methods=['GET'])
+def home():
+    return(render_template('home.html', page_name="Home"))
 
-# run the app.
-if __name__ == "__main__":
-    # Setting debug to True enables debug output. This line should be
-    # removed before deploying a production app.
-    application.debug = True
-    application.run()
+@app.route('/create', methods=['GET'])
+def create_meme():
+    return(render_template('create.html'))
+
+@app.route('/subscriptions', methods=['GET'])
+def get_subscriptions():
+    return(render_template('home.html', page_name="Subscriptions"))
+
+@app.route('/account', methods=['GET'])
+def handle_account():
+    return(render_template('account.html'))
+nav.init_app(app)
+
+if __name__ == '__main__':
+  app.run()
+  # app.run(host='127.0.0.1', port=5000, debug=True)
