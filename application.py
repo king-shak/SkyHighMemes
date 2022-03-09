@@ -2,11 +2,12 @@
 # IMPORTS.
 ##########
 from datetime import datetime
+import sys
 from time import sleep
-from doctest import UnexpectedException
 import os
 from flask import Flask
 import boto3
+import botocore
 
 ############
 # CONSTANTS.
@@ -22,9 +23,16 @@ def retrieveBucket(s3, bucketName):
     buckets = s3.buckets.all()
     bucket = [cur for cur in buckets if cur.name == bucketName]
     if (len(bucket) == 0):
-        exceptionMsg = "ERROR: Unable to retrieve bucket \"{bucketName}\"" \
-                            .format(bucketName = bucketName)
-        raise UnexpectedException(exceptionMsg)
+        # We don't own the bucket. See if we can still access it.
+        bucket = s3.Bucket(bucketName)
+        try:
+            # Run the head bucket operation to determine (a) if the bucket exists and (b) if we
+            # have access to it.
+            s3.meta.client.head_bucket(Bucket = BUCKET_NAME)
+        except botocore.exceptions.ClientError as e:
+            # The bucket may exist, but even if it does, we don't have access to it.
+            print("ERROR: Unable to retrieve bucket \"{bucketName}\"".format(bucketName = bucketName))
+            sys.exit()
 
     # Return the bucket.
     return s3.Bucket(bucketName)
@@ -73,8 +81,8 @@ def printObjectsInBucket(bucket):
 
 @application.route("/s3test")
 def storeTest():
-    success = True
-    msg = "Uploaded the file!"
+    success = True      # Keeps track of whether anything failed along the way.
+    msg = "Uploaded the file!"      # The message to be displayed on the page to the user.
 
     # First, print the contents of the bucket.
     print("Bucket contents at the start:")
