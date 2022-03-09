@@ -17,7 +17,8 @@ import string
 BUCKET_NAME = "skyhighmemes-store"
 MEME_IMG_ACL = "public-read"
 
-TABLE_NAME = "skyhighmemes-memes-table"
+USERS_TABLE_NAME = "skyhighmemes-user-table"
+MEMES_TABLE_NAME = "skyhighmemes-memes-table"
 REGION_NAME = "us-west-2"
 
 # These are used for the STS connection.
@@ -26,6 +27,9 @@ ROLE_SESSION_NAME = "RoleSessionName"
 
 # TODO: Remove this constant.
 N = 10
+
+# Debugging.
+SLEEP_TIME = 10
 
 ###########
 # S3 SETUP.
@@ -56,47 +60,53 @@ bucket = retrieveBucket(s3, BUCKET_NAME)
 #################
 # DYNAMODB SETUP.
 #################
-dynamodb = boto3.resource("dynamodb", region_name = REGION_NAME)
-table = dynamodb.Table(TABLE_NAME)
-creationTime = None
+def retrieveTable(tableName):
+    dynamodb = boto3.resource("dynamodb", region_name = REGION_NAME)
+    table = dynamodb.Table(MEMES_TABLE_NAME)
+    creationTime = None
 
-# Try to connect to the table. See if we own it.
-try: creationTime = table.creation_date_time
-except Exception as e: creationTime = None
+    # Try to connect to the table. See if we own it.
+    try: creationTime = table.creation_date_time
+    except Exception as e: creationTime = None
 
-if (creationTime == None):
-    # We don't own the table, so we must connect using STS.
-    try:
-        # Form the STS connection.
-        client = boto3.client("sts")
-        assumedRoleObject = client.assume_role(RoleArn = ROLE_ARN,
-                                                RoleSessionName = ROLE_SESSION_NAME)
+    if (creationTime == None):
+        # We don't own the table, so we must connect using STS.
+        try:
+            # Form the STS connection.
+            client = boto3.client("sts")
+            assumedRoleObject = client.assume_role(RoleArn = ROLE_ARN,
+                                                    RoleSessionName = ROLE_SESSION_NAME)
+            
+            # Grab the temporary credentials to make a connection to DynamoDB.
+            credentials = assumedRoleObject['Credentials']
+
+            # Form the DynamoDB connection and grab our table.
+            dynamodb = boto3.resource("dynamodb",
+                                        region_name= REGION_NAME, 
+                                        aws_access_key_id = credentials['AccessKeyId'],
+                                        aws_secret_access_key = credentials['SecretAccessKey'],
+                                        aws_session_token = credentials['SessionToken'])
+            table = dynamodb.Table(MEMES_TABLE_NAME)
+        except Exception as e:
+            # Some error in forming the STS connection, perhaps the roles or permissions are
+            # misconfigured.
+            print("ERROR: Failed to form STS connection: {errorMsg}".format(errorMsg = str(e)))
+            sys.exit()
         
-        # Grab the temporary credentials to make a connection to DynamoDB.
-        credentials = assumedRoleObject['Credentials']
-
-        # Form the DynamoDB connection and grab our table.
-        dynamodb = boto3.resource("dynamodb",
-                                    region_name= REGION_NAME, 
-                                    aws_access_key_id = credentials['AccessKeyId'],
-                                    aws_secret_access_key = credentials['SecretAccessKey'],
-                                    aws_session_token = credentials['SessionToken'])
-        table = dynamodb.Table(TABLE_NAME)
-    except Exception as e:
-        # Some error in forming the STS connection, perhaps the roles or permissions are
-        # misconfigured.
-        print("ERROR: Failed to form STS connection: {errorMsg}".format(errorMsg = str(e)))
-        sys.exit()
+        # STS connection succeeded, check the table is valid.
+        try:
+            creationTime = table.creation_date_time
+        except Exception as e:
+            # The table doesn't exist.
+            print("ERROR: Unable to retrieve table \"{tableName}\"".format(tableName = MEMES_TABLE_NAME))
+            sys.exit()
     
-    # STS connection succeeded, check the table is valid.
-    try:
-        creationTime = table.creation_date_time
-    except Exception as e:
-        # The table doesn't exist.
-        print("ERROR: Unable to retrieve table \"{tableName}\"".format(tableName = TABLE_NAME))
-        sys.exit()
+    # If we got here, we're good to go.
+    return table
 
-# If we got here, we're good to go.
+# Grab our two tables.
+memesTable = retrieveTable(MEMES_TABLE_NAME)
+usersTable = retrieveTable(USERS_TABLE_NAME)
 
 #####################
 # HTML FOR RESPONSES.
@@ -174,7 +184,7 @@ def storeTest():
     # Attempt to delete the object, print the contents of the bucket again.
     try:
         if (success):
-            sleep(10)
+            sleep(SLEEP_TIME)
             s3.Object(BUCKET_NAME, fileName).delete()
     except Exception as e:
         success = False
@@ -207,7 +217,7 @@ def dbTest():
     }
 
     # Make the entry in the DB.
-    try: table.put_item(Item = item)
+    try: memesTable.put_item(Item = item)
     except Exception as e:
         success = False
         msg = "Failed to put an item into the DB: {errMsg}".format(errMsg = str(e))
@@ -216,7 +226,7 @@ def dbTest():
     retrievedItem = None
     try:
         if (success):
-            response = table.get_item(Key = key)
+            response = memesTable.get_item(Key = key)
             retrievedItem = response['Item']
     except Exception as e:
         success = False
@@ -230,8 +240,8 @@ def dbTest():
     # Now, delete the entry.
     try:
         if (success):
-            sleep(10)
-            table.delete_item(Key = key)
+            sleep(SLEEP_TIME)
+            memesTable.delete_item(Key = key)
     except Exception as e:
         success = False
         msg = "Failed to remove the item from the DB: {errMsg}".format(errMsg = str(e))
