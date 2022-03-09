@@ -8,6 +8,8 @@ import os
 from flask import Flask
 import boto3
 import botocore
+import random
+import string
 
 ############
 # CONSTANTS.
@@ -15,9 +17,19 @@ import botocore
 BUCKET_NAME = "skyhighmemes-store"
 MEME_IMG_ACL = "public-read"
 
-############
-# AWS SETUP.
-############
+TABLE_NAME = "skyhighmemes-memes-table"
+REGION_NAME = "us-west-2"
+
+# These are used for the STS connection.
+ROLE_ARN = "arn:aws:iam::336154851508:role/dynamodb-full-access-role-test"
+ROLE_SESSION_NAME = "RoleSessionName"
+
+# TODO: Remove this constant.
+N = 10
+
+###########
+# S3 SETUP.
+###########
 def retrieveBucket(s3, bucketName):
     # Make sure the bucket exists, just in case.
     buckets = s3.buckets.all()
@@ -37,13 +49,58 @@ def retrieveBucket(s3, bucketName):
     # Return the bucket.
     return s3.Bucket(bucketName)
 
-# Setup S3.
+# Grab the bucket.
 s3 = boto3.resource("s3")
 bucket = retrieveBucket(s3, BUCKET_NAME)
 
-#########################
-# .
-#########################
+#################
+# DYNAMODB SETUP.
+#################
+dynamodb = boto3.resource("dynamodb", region_name = REGION_NAME)
+table = dynamodb.Table(TABLE_NAME)
+creationTime = None
+
+# Try to connect to the table. See if we own it.
+try: creationTime = table.creation_date_time
+except Exception as e: creationTime = None
+
+if (creationTime == None):
+    # We don't own the table, so we must connect using STS.
+    try:
+        # Form the STS connection.
+        client = boto3.client("sts")
+        assumedRoleObject = client.assume_role(RoleArn = ROLE_ARN,
+                                                RoleSessionName = ROLE_SESSION_NAME)
+        
+        # Grab the temporary credentials to make a connection to DynamoDB.
+        credentials = assumedRoleObject['Credentials']
+
+        # Form the DynamoDB connection and grab our table.
+        dynamodb = boto3.resource("dynamodb",
+                                    region_name= REGION_NAME, 
+                                    aws_access_key_id = credentials['AccessKeyId'],
+                                    aws_secret_access_key = credentials['SecretAccessKey'],
+                                    aws_session_token = credentials['SessionToken'])
+        table = dynamodb.Table(TABLE_NAME)
+    except Exception as e:
+        # Some error in forming the STS connection, perhaps the roles or permissions are
+        # misconfigured.
+        print("ERROR: Failed to form STS connection: {errorMsg}".format(errorMsg = str(e)))
+        sys.exit()
+    
+    # STS connection succeeded, check the table is valid.
+    try:
+        creationTime = table.creation_date_time
+    except Exception as e:
+        # The table doesn't exist.
+        print("ERROR: Unable to retrieve table \"{tableName}\"".format(tableName = TABLE_NAME))
+        sys.exit()
+
+# If we got here, we're good to go.
+
+#####################
+# HTML FOR RESPONSES.
+#####################
 
 # Form a greeting.
 def sayHello(username = "World"):
@@ -131,9 +188,61 @@ def storeTest():
     # Return the status to the user.
     return headerText + "<p>{msg}</p>".format(msg = msg) + homeLink + footerText
 
-# run the app.
+@application.route("/dbtest")
+def dbTest():
+    success = True
+    msg = "Successfully inserted a new item!"
+
+    # Generate some random strings, grab the current time, form the item.
+    picURL = "".join(random.choices(string.ascii_uppercase + string.digits, k = N))
+    title = "".join(random.choices(string.ascii_uppercase + string.digits, k = N))
+    time = str(datetime.now())
+    key = {
+        "picURL": picURL,
+        "title": title
+    }
+    item = {
+        **key,
+        "time": time
+    }
+
+    # Make the entry in the DB.
+    try: table.put_item(Item = item)
+    except Exception as e:
+        success = False
+        msg = "Failed to put an item into the DB: {errMsg}".format(errMsg = str(e))
+
+    # Retrieve the entry.
+    retrievedItem = None
+    try:
+        if (success):
+            response = table.get_item(Key = key)
+            retrievedItem = response['Item']
+    except Exception as e:
+        success = False
+        msg = "Failed to put an item into the DB: {errMsg}".format(errMsg = str(e))
+    
+    # Make sure the item we retrieved matches the original one.
+    if (retrievedItem != item):
+        success = False
+        msg = "The retrieved item was didn't match the original one."
+
+    # Now, delete the entry.
+    try:
+        if (success):
+            sleep(10)
+            table.delete_item(Key = key)
+    except Exception as e:
+        success = False
+        msg = "Failed to remove the item from the DB: {errMsg}".format(errMsg = str(e))
+
+    # Return something to the user.
+    return headerText + "<p>{msg}</p>".format(msg = msg) + homeLink + footerText
+
+##############
+# RUN THE APP.
+##############
 if __name__ == "__main__":
-    # Setting debug to True enables debug output. This line should be
-    # removed before deploying a production app.
+    # TODO: disable debugging mode when moving to production.
     application.debug = True
     application.run()
