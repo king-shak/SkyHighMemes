@@ -64,7 +64,7 @@ bucket = retrieveBucket(s3, BUCKET_NAME)
 #################
 def retrieveTable(tableName):
     dynamodb = boto3.resource("dynamodb", region_name = REGION_NAME)
-    table = dynamodb.Table(MEMES_TABLE_NAME)
+    table = dynamodb.Table(tableName)
     creationTime = None
 
     # Try to connect to the table. See if we own it.
@@ -88,7 +88,7 @@ def retrieveTable(tableName):
                                         aws_access_key_id = credentials['AccessKeyId'],
                                         aws_secret_access_key = credentials['SecretAccessKey'],
                                         aws_session_token = credentials['SessionToken'])
-            table = dynamodb.Table(MEMES_TABLE_NAME)
+            table = dynamodb.Table(tableName)
         except Exception as e:
             # Some error in forming the STS connection, perhaps the roles or permissions are
             # misconfigured.
@@ -100,7 +100,7 @@ def retrieveTable(tableName):
             creationTime = table.creation_date_time
         except Exception as e:
             # The table doesn't exist.
-            print("ERROR: Unable to retrieve table \"{tableName}\"".format(tableName = MEMES_TABLE_NAME))
+            print("ERROR: Unable to retrieve table \"{tableName}\"".format(tableName = tableName))
             sys.exit()
     
     # If we got here, we're good to go.
