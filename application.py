@@ -22,7 +22,9 @@ MEMES_TABLE_NAME = "skyhighmemes-memes-table"
 REGION_NAME = "us-west-2"
 
 # These are used for the STS connection.
-ROLE_ARN = "arn:aws:iam::336154851508:role/dynamodb-full-access-role-test"
+ROLE_ARN = "arn:aws:iam::336154851508:role/dynamodb-full-access-role-test"  # Hopefully we can use
+                                                                            # the same one for all
+                                                                            # of them...
 ROLE_SESSION_NAME = "RoleSessionName"
 
 # TODO: Remove this constant.
