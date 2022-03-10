@@ -24,7 +24,7 @@ Bootstrap(app)
 @app.route('/', methods=['GET'])
 def home():
     memes = get_memes()
-    return(render_template('home.html', page_name="Home", meme_list=memes))
+    return(render_template('home.html', page_title="Check out the latest memes", meme_list=memes, maker_title="Trending Makers"))
 
 @app.route('/create', methods=['GET'])
 def create_meme():
@@ -32,7 +32,8 @@ def create_meme():
 
 @app.route('/subscriptions', methods=['GET'])
 def get_subscriptions():
-    return(render_template('home.html', page_name="Subscriptions"))
+    memes = get_memes()
+    return(render_template('home.html', page_title="Memes from makers you're subscribed to", meme_list=memes, maker_title="Subscriptions"))
 
 @app.route('/account', methods=['GET'])
 def handle_account():

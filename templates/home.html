@@ -3,7 +3,7 @@
 {% block content %}
 <div class="pageContent">
   <div class="memeContent">
-    <h2>Check out the latest memes</h2>
+    <h2>{{page_title}}</h2>
     {% if meme_list %}
     {% for meme in meme_list %}
     <a href="{{url_for('meme', selected_meme=meme_list.index(meme))}}">
@@ -13,7 +13,7 @@
     {% endif %}
   </div>
   <div class="makersContent">
-    <h2>Trending Makers</h2> 
+    <h2>{{maker_title}}</h2> 
   </div>
 </div>
 {% endblock %}
