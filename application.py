@@ -1,3 +1,4 @@
+from manage_memes import get_memes, get_meme_url
 from flask import Flask, render_template
 from flask_bootstrap import Bootstrap
 from flask_nav import Nav
@@ -22,7 +23,8 @@ Bootstrap(app)
 
 @app.route('/', methods=['GET'])
 def home():
-    return(render_template('home.html', page_name="Home"))
+    memes = get_memes()
+    return(render_template('home.html', page_name="Home", meme_list=memes))
 
 @app.route('/create', methods=['GET'])
 def create_meme():
@@ -35,6 +37,13 @@ def get_subscriptions():
 @app.route('/account', methods=['GET'])
 def handle_account():
     return(render_template('account.html'))
+
+@app.route('/meme', methods=['GET'])
+def meme():
+    meme_id = request.args.get('selected_meme')
+    meme_url = get_meme_url(int(meme_id))
+    return(render_template('meme.html', meme_url=meme_url))
+
 nav.init_app(app)
 
 if __name__ == '__main__':

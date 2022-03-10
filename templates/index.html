@@ -6,6 +6,12 @@
   <link rel="icon" href="./static/img/SkyHigh_Memes.png">
 {% endblock %}
 
+{% block styles %}
+  {{super()}}
+  <link rel="stylesheet" href="{{url_for('.static', filename='style.css')}}">
+{% endblock %}
+
+
 {% block navbar %}
 {{nav.top.render()}}
 {% endblock %}

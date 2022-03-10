@@ -1,5 +1,19 @@
 {% extends "index.html" %}
 
 {% block content %}
-<p> {{page_name}} html page</p>
+<div class="pageContent">
+  <div class="memeContent">
+    <h2>Check out the latest memes</h2>
+    {% if meme_list %}
+    {% for meme in meme_list %}
+    <a href="{{url_for('meme', selected_meme=meme_list.index(meme))}}">
+        <img src="{{meme}}" height="250">
+    </a>
+    {% endfor %}
+    {% endif %}
+  </div>
+  <div class="makersContent">
+    <h2>Trending Makers</h2> 
+  </div>
+</div>
 {% endblock %}
