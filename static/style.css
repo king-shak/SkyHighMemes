@@ -1,0 +1,29 @@
+* {
+  color:dimgray;
+  background-color:lightblue;
+  font-family: "Comic Sans MS";
+}
+
+.pageContent {
+  display: flex;
+  padding: 50px 25px 0px;
+  background-image: url("./img/SkyHigh_Memes.png");
+  /* height: 500px; You must set a specified height */
+  background-position: center; /* Center the image */
+  background-repeat: no-repeat; /* Do not repeat the image */
+  /* background-size: cover; Resize the background image to cover the entire container */
+}
+
+.memeContent {
+  width: 75%;
+}
+
+.makersContent {
+  width: 25%;
+}
+
+img {
+  /* border: 1px solid darkgrey; */
+  border-radius: 5px;
+  padding: 5px;
+}
