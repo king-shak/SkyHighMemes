@@ -8,6 +8,7 @@ import boto3
 from flask import Blueprint, render_template
 from flask_login import current_user, login_required
 
+from manage_memes import get_meme_url, get_memes
 from util import retrieveBucket, retrieveTable
 
 ############
@@ -38,7 +39,10 @@ main = Blueprint('main', __name__)
 @main.route('/')
 def index():
     # TODO: Implement this.
-    return render_template('index.html')
+    memes = get_memes()
+    return render_template('home.html', page_title="Check out the latest memes",
+                                        meme_list=memes,
+                                        maker_title="Trending Makers")
 
 ########################
 # SUBSCRIPTIONS HANDLER.
@@ -47,7 +51,10 @@ def index():
 @login_required
 def subscriptions():
     # TODO: Implement this.
-    return "subscriptions"
+    memes = get_memes()
+    return(render_template('home.html', page_title="Memes from makers you're subscribed to",
+                                        meme_list=memes,
+                                        maker_title="Subscriptions"))
 
 ######################
 # MEME VIEWER HANDLER.
@@ -55,7 +62,9 @@ def subscriptions():
 @main.route('/meme/<uri>')
 def viewMeme(uri):
     # TODO: Implement this.
-    return "view meme {uri}".format(uri = uri)
+    # meme_id = request.args.get('selected_meme')
+    meme_url = get_meme_url(int(uri))
+    return(render_template('meme.html', meme_url=meme_url))
 
 ###########################
 # PORTFOLIO VIEWER HANDLER.
@@ -72,7 +81,7 @@ def viewPortfolio(username):
 @main.route('/create')
 def create():
     # TODO: Implement this.
-    return "create meme start"
+    return render_template('create.html')
 
 @main.route('/create', methods=["POST"])
 def create_post():

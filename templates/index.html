@@ -3,12 +3,12 @@
 <!-- overwrite title and metas block in head for bootstrap/base.html to add favicon -->
 {% block title %}Sky-High Memes{% endblock %}
 {% block metas %}
-  <link rel="icon" href="./static/img/SkyHigh_Memes.png">
+  <link rel="icon" href="{{ url_for('static', filename='img/SkyHigh_Memes.png') }}">
 {% endblock %}
 
 {% block styles %}
   {{super()}}
-  <link rel="stylesheet" href="{{url_for('.static', filename='style.css')}}">
+  <link rel="stylesheet" href="{{url_for('static', filename='style.css')}}">
 {% endblock %}
 
 
