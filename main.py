@@ -5,7 +5,7 @@
 # IMPORTS.
 ##########
 import boto3
-from flask import Blueprint, render_template
+from flask import Blueprint, render_template, request
 from flask_login import current_user, login_required
 
 from manage_memes import get_meme_url, get_memes
@@ -87,7 +87,8 @@ def create():
 @main.route('/create', methods=["POST"])
 def create_post():
     # TODO: Implement this.
-    raise NotImplementedError()
+    image_url = request.form[id]
+    return(render_template('meme.html', meme_url=image_url))
 
 ##################
 # PROFILE HANDLER.

@@ -1,7 +1,36 @@
 {% extends "index.html" %}
 
-{% block scripts %}
-{{super()}}
+{% block content %}
+<div class="imagePageContent">
+  <h2>Make a Meme</h2>
+  <br>
+  <input type="button" 
+         value="Upload your own image" 
+         onclick="ShowAndHide('uploadImage', 'chooseImage');";
+         />
+  <div class="uploadImage" id="uploadImage" style="display:none">
+      <form action="/create" method="post">
+          <input type="file" id="myFile" name="filename" accept=".png,.jpg">
+      <input type="submit" value="Next">
+  </div>
+  <br>
+  <h4>Or</h4>
+  <input type="button" 
+         value="Choose an image"
+         onclick="ShowAndHide('chooseImage', 'uploadImage');";
+         />
+  <br>
+  <div class="chooseImage" id="chooseImage" style="display:none">
+      <form action="/create" method="post">
+      {% for image in image_list %}
+        <img src="{{ image }}" class="smallsizeMeme">
+        <!-- <input type="image" id="{{image}}" src="{{image}}" class="smallsizeMeme"> -->
+      {% endfor %}
+      <input type="submit" value="Next">
+  </div>
+  </form>
+</div>
+
 <script type="text/javascript">
 function ShowAndHide(show, hide) {
     document.getElementById(show).style.display = 'block';
@@ -10,33 +39,3 @@ function ShowAndHide(show, hide) {
 </script>
 {% endblock %}
 
-
-{% block content %}
-<div class="imagePageContent">
-  <h2>Make a Meme</h2>
-  <br>
-  <input type="button" 
-         value="Upload your own image" 
-         onclick="ShowAndHide('uploadImage', 'chooseImage')"
-         />
-  <h4>Or</h4>
-  <input type="button" 
-         value="Choose an image"
-         onclick="ShowAndHide('chooseImage', 'uploadImage')"
-         />
-  <div class="uploadImage" id="uploadImage" style="display:none">
-      <form action="/create" method="post">
-          <input type="file" id="myFile" name="filename" accept=".png,.jpg">
-      <input type="submit" value="Next">
-  </div>
-  <br>
-  <div class="chooseImage" id="chooseImage" style="display:none">
-      <form action="/create" method="post">
-      {% for image in image_list %}
-        <input type="image" src="{{image}}" class="smallsizeMeme">
-      {% endfor %}
-      <input type="submit" value="Next">
-  </div>
-  </form>
-</div>
-{% endblock %}
