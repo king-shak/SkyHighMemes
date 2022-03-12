@@ -9,6 +9,7 @@ from flask import Blueprint, render_template, request
 from flask_login import current_user, login_required
 
 from manage_memes import get_meme_url, get_memes
+from meme_maker import addTextToImage, downloadImgFromURL
 from util import retrieveBucket, retrieveTable
 
 ############

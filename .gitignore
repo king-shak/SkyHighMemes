@@ -1,6 +1,7 @@
 __pycache__
 .vscode
 virt
+.venv
 # Elastic Beanstalk Files
 .elasticbeanstalk/*
 !.elasticbeanstalk/*.cfg.yml
