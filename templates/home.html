@@ -7,13 +7,18 @@
     {% if meme_list %}
     {% for meme in meme_list %}
     <a href="{{ url_for('main.viewMeme', uri=meme_list.index(meme)) }}">
-        <img src="{{ meme }}" height="250">
+        <img src="{{ meme }}" class="midsizeMeme">
     </a>
     {% endfor %}
     {% endif %}
   </div>
   <div class="makersContent">
-    <h2>{{maker_title}}</h2> 
+    {% for maker in maker_list %}
+    <div class="makerItem">
+      <h2>{{maker.title}}</h2> 
+      <h2>{{maker.sub_count}}</h2> 
+    </div>
+    {% endfor %}
   </div>
 </div>
 {% endblock %}

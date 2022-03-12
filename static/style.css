@@ -1,17 +1,24 @@
-* {
-  color:dimgray;
-  background-color:lightblue;
+* , .hero.is-primary {
+  color:azure;
+  background-color:hsl(219, 79%, 66%);
+  /* background-color:cornflowerblue; */
   font-family: "Comic Sans MS";
+}
+a:hover {
+  background-color: hsla(219, 79%, 66%, 0.5);
 }
 
 .pageContent {
   display: flex;
   padding: 50px 25px 0px;
-  background-image: url("./img/SkyHigh_Memes.png");
-  /* height: 500px; You must set a specified height */
-  background-position: center; /* Center the image */
-  background-repeat: no-repeat; /* Do not repeat the image */
-  /* background-size: cover; Resize the background image to cover the entire container */
+}
+
+.imagPageContent {
+  display: initial;
+}
+
+.is-fullheight {
+  display: block;
 }
 
 .memeContent {
@@ -22,8 +29,15 @@
   width: 25%;
 }
 
+.smallsizeMeme {
+  height: 200px;
+}
+
+.midsizeMeme {
+  height: 250px;
+}
+
 img {
-  /* border: 1px solid darkgrey; */
   border-radius: 5px;
-  padding: 5px;
+  margin: 5px;
 }

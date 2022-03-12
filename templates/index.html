@@ -7,11 +7,27 @@
 {% endblock %}
 
 {% block styles %}
-  {{super()}}
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.2/css/bulma.min.css" />
   <link rel="stylesheet" href="{{url_for('static', filename='style.css')}}">
 {% endblock %}
 
+{% block body %}
+<section class="hero is-primary is-fullheight">
+    <div class="hero-head">
+        <nav class="navbar">
+            <div class="container">
+                <div id="navbarMenuHeroA" class="navbar-menu">
+    {% block navbar %}
+    {{nav.top.render(renderer='just_div_renderer')}}
+    {% endblock %}
+                </div>
+            </div>
+        </div>
+    </div>
 
-{% block navbar %}
-{{nav.top.render()}}
+    <div class="hero-body">
+    {% block content %}
+    {% endblock %}
+    </div>
+</section>
 {% endblock %}

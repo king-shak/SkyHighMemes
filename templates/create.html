@@ -1,5 +1,42 @@
 {% extends "index.html" %}
 
+{% block scripts %}
+{{super()}}
+<script type="text/javascript">
+function ShowAndHide(show, hide) {
+    document.getElementById(show).style.display = 'block';
+    document.getElementById(hide).style.display = 'none';
+}
+</script>
+{% endblock %}
+
+
 {% block content %}
-<p> Create meme html page</p>
+<div class="imagePageContent">
+  <h2>Make a Meme</h2>
+  <br>
+  <input type="button" 
+         value="Upload your own image" 
+         onclick="ShowAndHide('uploadImage', 'chooseImage')"
+         />
+  <h4>Or</h4>
+  <input type="button" 
+         value="Choose an image"
+         onclick="ShowAndHide('chooseImage', 'uploadImage')"
+         />
+  <div class="uploadImage" id="uploadImage" style="display:none">
+      <form action="/create" method="post">
+          <input type="file" id="myFile" name="filename" accept=".png,.jpg">
+      <input type="submit" value="Next">
+  </div>
+  <br>
+  <div class="chooseImage" id="chooseImage" style="display:none">
+      <form action="/create" method="post">
+      {% for image in image_list %}
+        <input type="image" src="{{image}}" class="smallsizeMeme">
+      {% endfor %}
+      <input type="submit" value="Next">
+  </div>
+  </form>
+</div>
 {% endblock %}

@@ -81,7 +81,8 @@ def viewPortfolio(username):
 @main.route('/create')
 def create():
     # TODO: Implement this.
-    return render_template('create.html')
+    memes = get_memes()
+    return render_template('create.html', image_list=memes)
 
 @main.route('/create', methods=["POST"])
 def create_post():
