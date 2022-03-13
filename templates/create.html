@@ -10,7 +10,7 @@
          />
   <div class="uploadImage" id="uploadImage" style="display:none">
       <form action="/create" method="post">
-          <input type="file" id="myFile" name="filename" accept=".png,.jpg">
+          <input type="file" id="myFile" name="memeImageFile" accept=".png,.jpg">
       <input type="submit" value="Next">
   </div>
   <br>
@@ -23,9 +23,10 @@
   <div class="chooseImage" id="chooseImage" style="display:none">
       <form action="/create" method="post">
       {% for image in image_list %}
-        <img src="{{ image }}" class="smallsizeMeme">
+        <img src="{{ image }}" id="{{ image }}" class="smallsizeMeme" onclick="selectImage('{{image}}')">
         <!-- <input type="image" id="{{image}}" src="{{image}}" class="smallsizeMeme"> -->
       {% endfor %}
+      <input type="hidden" id="imageUrl" name="memeImageUrl">
       <input type="submit" value="Next">
   </div>
   </form>
@@ -35,6 +36,15 @@
 function ShowAndHide(show, hide) {
     document.getElementById(show).style.display = 'block';
     document.getElementById(hide).style.display = 'none';
+}
+</script>
+<script type="text/javascript">
+function selectImage(url) {
+    // highlight image and make sure the rest cannot be at the same time
+    // document.getElementsByTagName('img').style.border = '2px solid black';
+    document.getElementById(url).style.border = '2px solid black';
+    // send url back
+    document.getElementById('imageUrl').value = url;
 }
 </script>
 {% endblock %}

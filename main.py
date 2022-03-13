@@ -88,8 +88,11 @@ def create():
 @main.route('/create', methods=["POST"])
 def create_post():
     # TODO: Implement this.
-    image_url = request.form[id]
-    return(render_template('meme.html', meme_url=image_url))
+    # image_url = request.form['filename']
+    image_file = request.form['memeImageFile']
+    image_url = request.form['memeImageUrl']
+    # meme.html was put as placeholder, so it's clear how the image was passed
+    return(render_template('meme.html', meme_url=image_url if image_url else image_file))
 
 ##################
 # PROFILE HANDLER.
