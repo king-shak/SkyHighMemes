@@ -5,9 +5,9 @@
   <div class="memeContent">
     <h2>{{page_title}}</h2>
     {% if meme_list %}
-    {% for meme in meme_list %}
-    <a href="{{ url_for('main.viewMeme', uri=meme_list.index(meme)) }}">
-        <img src="{{ meme }}" class="midsizeMeme">
+    {% for img in meme_list %}
+    <a href="/meme/{{loop.index}}">
+        <img src="{{ img }}" class="midsizeMeme">
     </a>
     {% endfor %}
     {% endif %}

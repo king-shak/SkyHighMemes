@@ -1,7 +1,50 @@
 {% extends "index.html" %}
 
 {% block content %}
-<p>Single meme html page</p>
-<img src="{{ meme_url }}" height="250">
-<p>meme info</p>
+
+<html>
+  <head>
+    <style>
+      .container {
+        display: flex;
+        align-items: center;
+        justify-content: center
+      }
+      img {
+        max-width: 100%
+      }
+      .image {
+        flex-basis: 40%
+      }
+      .text {
+        font-size: 20px;
+        padding-left: 20px;
+      }
+      .imgs {
+        display: flex;
+        flex-wrap: wrap;
+        padding: 2px 4px;
+       }
+    </style>
+  </head>
+  <body >
+    {% if url %}  
+    <div class="container">
+      <div class="image">
+        <img src="{{url}}" width="700" height="345"> 
+      </div>
+    </div>
+    {% endif %}
+  </body>
+  <h1 >
+    More memes
+  </h1>
+  <div class="imgs">
+    {% for im in images %}
+       <a href="/meme/{{loop.index}}">
+          <img height="200" width="200" src="{{im}}">
+       </a>
+    {% endfor %}
+  </div>
+</html>
 {% endblock %}

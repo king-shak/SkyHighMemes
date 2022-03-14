@@ -7,6 +7,7 @@
 import boto3
 from flask import Blueprint, render_template, request
 from flask_login import current_user, login_required
+from sqlalchemy import null
 
 from manage_memes import get_meme_url, get_memes
 from meme_maker import addTextToImage, downloadImgFromURL
@@ -64,8 +65,11 @@ def subscriptions():
 def viewMeme(uri):
     # TODO: Implement this.
     # meme_id = request.args.get('selected_meme')
-    meme_url = get_meme_url(int(uri))
-    return(render_template('meme.html', meme_url=meme_url))
+    memes = get_memes()
+    url = memes[int(uri)-1]
+    
+    # meme_url = get_meme_url(int(uri))
+    return(render_template('meme.html', url=url,images=memes))
 
 ###########################
 # PORTFOLIO VIEWER HANDLER.
