@@ -96,7 +96,7 @@ def create_post():
     image_file = request.form['memeImageFile']
     image_url = request.form['memeImageUrl']
     # meme.html was put as placeholder, so it's clear how the image was passed
-    return(render_template('meme.html', meme_url=image_url if image_url else image_file))
+    return(render_template('meme.html', url=image_url if image_url else image_file))
 
 ##################
 # PROFILE HANDLER.
