@@ -2,7 +2,6 @@ from PIL import Image, ImageDraw, ImageFont
 import textwrap
 from string import ascii_letters
 import requests
-import os
 
 # attempts to download file from given URL
 # returns the name it downloaded it as, 
@@ -37,7 +36,7 @@ def addTextToImage(imageName, text):
     fontSize = int(height * 0.06)
     if fontSize < 20:
         fontSize = 20
-    font = ImageFont.truetype("fonts/MICROSS.ttf",size=fontSize)
+    font = ImageFont.truetype("fonts/MICROSS.TTF",size=fontSize)
     avgCharWidth = sum(font.getsize(char)[0] for char in text) / len(text)
     maxCharsInLine = int(width / avgCharWidth) - 1 # -1 to account for horizontal padding
     wrappedText = textwrap.fill(text=text, width=maxCharsInLine)

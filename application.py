@@ -12,6 +12,12 @@ from auth import usersTable
 from main import main as main_blueprint, nav
 from models import User
 
+############
+# CONSTANTS.
+############
+SECRET_KEY = 'secret-key-goes-here'
+UPLOAD_FOLDER = 'upload/'
+
 ####################
 # BUILD APPLICATION.
 ####################
@@ -19,7 +25,8 @@ application = Flask(__name__)
 Bootstrap(application)
 
 # This has something to do with session management - idk what but DO NOT REMOVE.
-application.config['SECRET_KEY'] = 'secret-key-goes-here'
+application.config['SECRET_KEY'] = SECRET_KEY
+application.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 # Configure the login manager.
 login_manager = LoginManager()

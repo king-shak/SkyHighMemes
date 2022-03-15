@@ -1,0 +1,21 @@
+{% extends "index.html" %}
+
+{% block content %}
+<div class="imagePageContent">
+  <h2>Add Text</h2>
+  <div>
+    <div>
+      <img src="{{ memeURL }}" style="width:35rem;height:35rem"> 
+    </div>
+
+    <div>
+      <form action="/create" method="post">
+        <input type="text" name="memeText">
+        <input type="hidden" name="imgURL" value="{{ memeURL }}">
+        <input name="generate" type="submit" value="Generate">
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
+

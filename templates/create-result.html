@@ -1,0 +1,25 @@
+{% extends "index.html" %}
+
+{% block content %}
+<div class="imagePageContent">
+  <h2>Here is Your Generated Meme!</h2>
+  <div>
+    <div>
+      <img src="{{ memeURL }}" style="width:35rem;height:35rem"> 
+    </div>
+
+    <div>
+      <p>To save your meme to your machine, right-click the memes and choose "Save image as..."</p>
+      <form action="/create" method="post">
+        {% if current_user.is_authenticated %}
+        <input type="checkbox" name="saveToProfile">
+        <label for="saveToProfile">Save to Portfolio</label>
+        {% endif %}
+        <input type="hidden" name="imgURL" value="{{ memeURL }}">
+        <input name="save" type="submit" value="Continue">
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
+

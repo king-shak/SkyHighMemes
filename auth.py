@@ -35,6 +35,7 @@ auth = Blueprint('auth', __name__)
 #################
 @auth.route('/login')
 def login():
+    # Register the unauthenticated topbar and return the login page.
     nav.register_element('top', unauthenticatedTopBar)
     return render_template('login.html')
 
@@ -87,11 +88,13 @@ def createUser(email, username, password):
 
 @auth.route('/signup')
 def signup():
+    # Register the unauthenticated topbar.
     nav.register_element('top', unauthenticatedTopBar)
     return render_template('signup.html')
 
 @auth.route('/signup', methods=['POST'])
 def signup_post():
+    # Register the unauthenticated topbar.
     nav.register_element('top', unauthenticatedTopBar)
 
     # Grab the email, username and password from the HTML form.
@@ -121,6 +124,7 @@ def signup_post():
 @auth.route('/logout')
 @login_required
 def logout():
+    # Register the unauthenticated topbar.
     nav.register_element('top', unauthenticatedTopBar)
     logout_user()   # Ends the session.
     return redirect(url_for('main.index'))  # Redirect to the landing page.

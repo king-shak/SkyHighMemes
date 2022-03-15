@@ -6,12 +6,12 @@
   <br>
   <input type="button" 
          value="Upload your own image" 
-         onclick="ShowAndHide('uploadImage', 'chooseImage');";
-         />
+         onclick="ShowAndHide('uploadImage', 'chooseImage');"/>
   <div class="uploadImage" id="uploadImage" style="display:none">
-      <form action="/create" method="post">
-          <input type="file" id="myFile" name="memeImageFile" accept=".png,.jpg">
-      <input type="submit" value="Next">
+    <form action="/create" method="post" enctype="multipart/form-data">
+        <input type="file" id="myFile" name="memeImageFile" accept=".png,.jpg">
+        <input name="myfile" type="submit" value="Next">
+    </form>
   </div>
   <br>
   <h4>Or</h4>
@@ -22,14 +22,13 @@
   <br>
   <div class="chooseImage" id="chooseImage" style="display:none">
       <form action="/create" method="post">
-      {% for image in image_list %}
-        <img src="{{ image }}" id="{{ image }}" class="smallsizeMeme" onclick="selectImage('{{image}}')">
-        <!-- <input type="image" id="{{image}}" src="{{image}}" class="smallsizeMeme"> -->
-      {% endfor %}
-      <input type="hidden" id="imageUrl" name="memeImageUrl">
-      <input type="submit" value="Next">
+        {% for image in image_list %}
+            <img src="{{ image }}" id="{{ image }}" class="smallsizeMeme" onclick="selectImage('{{image}}')">
+        {% endfor %}
+        <input type="hidden" id="imageUrl" name="memeImageUrl">
+        <input name="ourfile" type="submit" value="Next">
+      </form>
   </div>
-  </form>
 </div>
 
 <script type="text/javascript">
