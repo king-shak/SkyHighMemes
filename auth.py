@@ -11,6 +11,7 @@ from flask import Blueprint, flash, redirect, render_template, request, url_for
 from flask_login import login_required, login_user, logout_user
 from werkzeug.security import check_password_hash, generate_password_hash
 
+from main import authenticatedTopBar, unauthenticatedTopBar, nav
 from models import User
 from util import retrieveTable
 
@@ -34,6 +35,7 @@ auth = Blueprint('auth', __name__)
 #################
 @auth.route('/login')
 def login():
+    nav.register_element('top', unauthenticatedTopBar)
     return render_template('login.html')
 
 @auth.route('/login', methods=['POST'])
@@ -50,10 +52,12 @@ def login_post():
     if (user.id != None and check_password_hash(user.passwordHash, password)):
         # The user has the right credentials.
         login_user(user, remember=remember)     # Starts the session.
-        return redirect(url_for('main.profile'))
+        nav.register_element('top', authenticatedTopBar)
+        return redirect(url_for('main.subscriptions'))
     else:
         # Incorrect credentials.
         flash('Please check your login details and try again.')
+        nav.register_element('top', unauthenticatedTopBar)
         return redirect(url_for('auth.login'))
 
 ##################
@@ -83,10 +87,13 @@ def createUser(email, username, password):
 
 @auth.route('/signup')
 def signup():
+    nav.register_element('top', unauthenticatedTopBar)
     return render_template('signup.html')
 
 @auth.route('/signup', methods=['POST'])
 def signup_post():
+    nav.register_element('top', unauthenticatedTopBar)
+
     # Grab the email, username and password from the HTML form.
     email = request.form.get('email')
     username = request.form.get('name')
@@ -114,5 +121,6 @@ def signup_post():
 @auth.route('/logout')
 @login_required
 def logout():
+    nav.register_element('top', unauthenticatedTopBar)
     logout_user()   # Ends the session.
     return redirect(url_for('main.index'))  # Redirect to the landing page.

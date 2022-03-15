@@ -5,9 +5,12 @@
 # IMPORTS.
 ##########
 import boto3
+from dominate import tags
 from flask import Blueprint, render_template, request
 from flask_login import current_user, login_required
-from sqlalchemy import null
+from flask_nav import Nav, register_renderer
+from flask_nav.elements import Navbar, View
+from flask_nav.renderers import Renderer
 
 from manage_memes import get_meme_url, get_memes
 from meme_maker import addTextToImage, downloadImgFromURL
@@ -33,6 +36,51 @@ bucket = retrieveBucket(s3, BUCKET_NAME)
 # Grab the memes table.
 memesTable = retrieveTable(MEMES_TABLE_NAME)
 
+# registers the "top" menubar
+nav = Nav()
+@nav.renderer()
+class JustDivRenderer(Renderer):
+    def visit_Navbar(self, node):
+        kwargs = {'_class': 'navbar-end'}
+        cont = tags.div(**kwargs)
+        for item in node.items:
+            cont.add(self.visit(item))
+
+        return cont
+
+    def visit_View(self, node):
+        kwargs = {'_class': 'navbar-item'}
+        return tags.a(node.text,
+                      href=node.get_url(),
+                      title=node.text,
+                      **kwargs)
+
+    def visit_Subgroup(self, node):
+        group = tags.ul(_class='subgroup')
+        title = tags.span(node.title)
+        if node.active:
+            title.attributes['class'] = 'active'
+
+        for item in node.items:
+            group.add(tags.li(self.visit(item)))
+
+        return tags.div(title, group)
+
+logo = tags.img(src='./static/img/SkyHigh_Memes.png', height="50", style="margin-top:-15px")
+authenticatedTopBar = Navbar(View(logo, 'main.index'),
+                            View('Home', 'main.index'),
+                            View('Make a Meme', 'main.create'),
+                            View('Subscriptions', 'main.subscriptions'),
+                            View('Log out', 'auth.logout'))
+
+unauthenticatedTopBar = Navbar(View(logo, 'main.index'),
+                                View('Home', 'main.index'),
+                                View('Make a Meme', 'main.create'),
+                                View('Subscriptions', 'main.subscriptions'),
+                                View('Log in', 'auth.login'),
+                                View('Sign up', 'auth.signup'))
+nav.register_element('top', unauthenticatedTopBar)
+
 main = Blueprint('main', __name__)
 
 ###############################
@@ -40,6 +88,9 @@ main = Blueprint('main', __name__)
 ###############################
 @main.route('/')
 def index():
+    if (current_user.is_authenticated): nav.register_element('top', authenticatedTopBar)
+    else: nav.register_element('top', unauthenticatedTopBar)
+
     # TODO: Implement this.
     memes = get_memes()
     return render_template('home.html', page_title="Check out the latest memes",
@@ -52,6 +103,8 @@ def index():
 @main.route('/subscriptions')
 @login_required
 def subscriptions():
+    nav.register_element('top', authenticatedTopBar)
+
     # TODO: Implement this.
     memes = get_memes()
     return(render_template('home.html', page_title="Memes from makers you're subscribed to",
@@ -63,6 +116,9 @@ def subscriptions():
 ######################
 @main.route('/meme/<uri>')
 def viewMeme(uri):
+    if (current_user.is_authenticated): nav.register_element('top', authenticatedTopBar)
+    else: nav.register_element('top', unauthenticatedTopBar)
+
     # TODO: Implement this.
     # meme_id = request.args.get('selected_meme')
     memes = get_memes()
@@ -76,6 +132,9 @@ def viewMeme(uri):
 ###########################
 @main.route('/portfolio/<username>')
 def viewPortfolio(username):
+    if (current_user.is_authenticated): nav.register_element('top', authenticatedTopBar)
+    else: nav.register_element('top', unauthenticatedTopBar)
+
     # TODO: Implement this.
     # TODO: Check that username actually exists. The user could enter some junk in the URL bar.
     return "view portfolio of {username}".format(username = username)
@@ -85,12 +144,18 @@ def viewPortfolio(username):
 #######################
 @main.route('/create')
 def create():
+    if (current_user.is_authenticated): nav.register_element('top', authenticatedTopBar)
+    else: nav.register_element('top', unauthenticatedTopBar)
+
     # TODO: Implement this.
     memes = get_memes()
     return render_template('create.html', image_list=memes)
 
 @main.route('/create', methods=["POST"])
 def create_post():
+    if (current_user.is_authenticated): nav.register_element('top', authenticatedTopBar)
+    else: nav.register_element('top', unauthenticatedTopBar)
+
     # TODO: Implement this.
     # image_url = request.form['filename']
     image_file = request.form['memeImageFile']
@@ -106,4 +171,7 @@ def create_post():
 @main.route('/profile')
 @login_required
 def profile():
+    if (current_user.is_authenticated): nav.register_element('top', authenticatedTopBar)
+    else: nav.register_element('top', unauthenticatedTopBar)
+
     return render_template('profile.html', name=current_user.username)
