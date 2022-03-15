@@ -4,11 +4,8 @@
   /* background-color:cornflowerblue; */
   font-family: "Comic Sans MS";
 }
-a:hover {
-  background-color: hsla(219, 79%, 66%, 0.5);
-}
 
-.pageContent {
+.page-content {
   display: flex;
   padding: 50px 25px 0px;
 }
@@ -21,11 +18,29 @@ a:hover {
   display: block;
 }
 
-.memeContent {
+.logo-container {
+  margin-top: 15px;
+  display:flex;
+  flex-direction: row;
+  align-items:center;
+}
+
+.maker-item {
+  display:flex;
+  flex-direction: row;
+  justify-content: space-between;
+
+  border-radius: 5px;
+  border: 2px solid white;
+  margin: 5px;
+  padding: 5px;
+}
+
+.meme-content {
   width: 75%;
 }
 
-.makersContent {
+.makers-content {
   width: 25%;
 }
 

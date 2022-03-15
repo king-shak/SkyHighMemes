@@ -1,8 +1,8 @@
 {% extends "index.html" %}
 
 {% block content %}
-<div class="pageContent">
-  <div class="memeContent">
+<div class="page-content">
+  <div class="meme-content">
     <h2>{{page_title}}</h2>
     {% if meme_list %}
     {% for img in meme_list %}
@@ -12,12 +12,15 @@
     {% endfor %}
     {% endif %}
   </div>
-  <div class="makersContent">
+  <div class="makers-content">
+    <h2>{{maker_title}}</h2>
     {% for maker in maker_list %}
-    <div class="makerItem">
-      <h2>{{maker.title}}</h2> 
-      <h2>{{maker.sub_count}}</h2> 
-    </div>
+      <a href="/portfolio/{{maker['name']}}">
+        <div class="maker-item">        
+          <h2 style="text-align: left;">{{maker['name']}}</h2> 
+          <h2 style="text-align: right;">{{maker['subs']}} subs</h2> 
+        </div>
+      </a>
     {% endfor %}
   </div>
 </div>
