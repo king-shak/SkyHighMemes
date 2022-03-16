@@ -5,7 +5,14 @@ mock_data = [
   "https://cdn.discordapp.com/attachments/828079037565108265/953530905387999232/unknown.png",
   "https://media.discordapp.net/attachments/828079037565108265/953531153858576394/unknown.png",
   "https://cdn.discordapp.com/attachments/828079037565108265/953531433341845594/unknown.png",
-  "https://cdn.discordapp.com/attachments/828079037565108265/953532727246868550/download.gif"
+  "https://cdn.discordapp.com/attachments/828079037565108265/953532727246868550/download.gif",
+  "https://cdn.discordapp.com/attachments/948007526815920233/953538749243998218/Macaca_nigra_self-portrait__rotated_and_cropped_.0.jpg",
+  "https://cdn.discordapp.com/attachments/828079037565108265/953539068455714816/unknown.png",
+  "https://cdn.discordapp.com/attachments/828079037565108265/953539307275186206/unknown.png",
+  "https://cdn.discordapp.com/attachments/828079037565108265/953539677451866112/unknown.png",
+  "https://cdn.discordapp.com/attachments/828079037565108265/953540703827410974/unknown.png",
+  "https://cdn.discordapp.com/attachments/828079037565108265/953541429572010014/unknown.png",
+  "https://c.tenor.com/Jt2hUuHic60AAAAM/denzel-washington-my-heart.gif"
 ]
 
 makers_mock_data = [
