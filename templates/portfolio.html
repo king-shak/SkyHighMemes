@@ -1,0 +1,28 @@
+{% extends "index.html" %}
+
+{% block content %}
+<div class="page-content">
+  <div class="meme-content">
+    {% if meme_list %}
+      <h2>{{ page_title }}</h2>
+      {% if current_user.is_authenticated and not sameUser %}
+        {% if not subscribed %}
+          <form action="/portfolio" method="post">
+            <input type="hidden" name="creator" value="{{ creatorName }}">
+            <input type="submit" value="Subscribe">
+          </form>
+        {% else %}
+          <p>You're subscribed to {{ creatorName }}!</p>
+        {% endif %}
+      {% endif %}
+      {% for img in meme_list %}
+        <a href="/meme/{{ img[1] }}">
+            <img src="{{ img[0] }}" class="midsizeMeme">
+        </a>
+      {% endfor %}
+    {% else %}
+      <h2>This user hasn't created any memes yet!</h2>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

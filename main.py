@@ -4,11 +4,15 @@
 ##########
 # IMPORTS.
 ##########
+from crypt import methods
 import datetime
 from email.mime import image
 import hashlib
 import os
+import random
+from types import new_class
 import boto3
+from boto3.dynamodb.conditions import Attr
 from dominate import tags
 from flask import Blueprint, abort, flash, redirect, render_template, request, url_for
 from flask_login import current_user, login_required
@@ -82,6 +86,7 @@ authenticatedTopBar = Navbar(View(logo, 'main.index'),
                             View('Home', 'main.index'),
                             View('Make a Meme', 'main.create'),
                             View('Subscriptions', 'main.subscriptions'),
+                            View('My Memes', 'main.profile'),
                             View('Log out', 'auth.logout'))
 unauthenticatedTopBar = Navbar(View(logo, 'main.index'),
                                 View('Home', 'main.index'),
@@ -101,19 +106,53 @@ main = Blueprint('main', __name__)
 ###############################
 # INDEX (LANDING PAGE) HANDLER.
 ###############################
+def getMemes(creators):
+    # First, retrieve the creators we should get memes from.
+    chosenUsers = []
+    if (creators == 'all'):     # Get memes from all creators.
+        # Retrieve all the users.
+        response = usersTable.scan()
+        users = response['Items']
+
+        # Choose 10 users at random.
+        if (len(users) > 10): chosenUsers = random.sample(users, 10)
+        else: chosenUsers = users
+    else:       # Get memes from a select few creators.
+        for creator in creators:    # creator is the creator ID (email).
+            response = usersTable.get_item(Key = {'email': creator})
+            chosenUsers.append(response['Item'])
+    
+    # Grab the URIs of the first 3 memes for each user.
+    memes = []
+    names = []
+    for user in chosenUsers:
+        count = 3
+        if ('memes' not in user): continue
+        maker = {'name': user['username'], 'subs': 0}
+        if ('subscribers' in user): maker['subs'] = len(user['subscribers'])
+        names.append(maker)
+        for meme in user['memes']:
+            if (count == 0): break
+            response = memesTable.get_item(Key = {'uri': meme})
+            memes.append([response['Item']['url'], meme])
+            count = count - 1
+
+    # Return the memes, and sort the names list.
+    return memes, sorted(names, key=lambda m: m['subs'], reverse=True)
+
 @main.route('/')
 def index():
     # Register the appropriate topbar.
     if (current_user.is_authenticated): nav.register_element('top', authenticatedTopBar)
     else: nav.register_element('top', unauthenticatedTopBar)
 
-    # TODO: Implement this.
-    memes = get_memes()
-    makers = get_makers()
+    # Grab the memes.
+    memes, names = getMemes('all')
+
     return render_template('home.html', page_title="Check out the latest memes",
                                         meme_list=memes,
                                         maker_title="Trending Makers",
-                                        maker_list=makers)
+                                        maker_list=names)
 
 ########################
 # SUBSCRIPTIONS HANDLER.
@@ -124,26 +163,39 @@ def subscriptions():
     # Register the authenticated topbar.
     nav.register_element('top', authenticatedTopBar)
 
-    # TODO: Implement this.
-    memes = get_memes()
-    return(render_template('home.html', page_title="Memes from makers you're subscribed to",
+    # Grab the memes.
+    memes = None
+    names = None
+    response = usersTable.get_item(Key = {"email": current_user.id})
+    curUser = response['Item']
+    if ('subscriptions' in curUser): memes, names = getMemes(curUser['subscriptions'])
+
+    return render_template('home.html', page_title="Memes from makers you're subscribed to",
                                         meme_list=memes,
-                                        maker_title="Subscriptions"))
+                                        maker_title="Subscriptions",
+                                        maker_list=names)
 
 ######################
 # MEME VIEWER HANDLER.
 ######################
-def getUserMemes(userid, exclude = None):
+def getUserMemes(userid, limit = None, exclude = None):
+    # Grab the URIs of all the memes created by this user.
     response = usersTable.get_item(Key = {"email": userid})
+    if ('memes' not in response['Item']): return None
     allMemes = response['Item']['memes']
-    memes = []
-    for i in range(9):
-        if (i == len(allMemes)): break
-        elif (allMemes[i] == exclude): continue
+
+    # Setup loop params.
+    if (limit == None): limit = len(allMemes)
+    selection = []
+    for uri in allMemes:
+        if (limit == 0): break      # We've reached the limit.
+        elif (uri == exclude): continue     # We need to skip this meme.
         else:
-            response = memesTable.get_item(Key = {'uri': allMemes[i]})
-            memes.append([response['Item']['url'], allMemes[i]])
-    return memes
+            # Grab the meme URL.
+            response = memesTable.get_item(Key = {'uri': uri})
+            selection.append([response['Item']['url'], uri])
+            limit = limit - 1
+    return selection
 
 @main.route('/meme/<uri>')
 def viewMeme(uri):
@@ -154,10 +206,16 @@ def viewMeme(uri):
     # Grab the meme requested and other memes from the creator.
     response = memesTable.get_item(Key = {'uri': uri})
     if ('Item' not in response): abort(404)
-    memes = getUserMemes(response['Item']['owner'], exclude=uri)
+    imgURL = response['Item']['url']
+    creatorID = response['Item']['owner']
+    memes = getUserMemes(creatorID, limit=9, exclude=uri)
+    
+    # Get the name of the creator.
+    response = usersTable.get_item(Key = {'email': creatorID})
+    creatorName = response['Item']['username']
     
     # Return them all to the user.
-    return render_template('meme.html', url=response['Item']['url'], images=memes)
+    return render_template('meme.html', url=imgURL, images=memes, creator_name=creatorName)
 
 ###########################
 # PORTFOLIO VIEWER HANDLER.
@@ -168,13 +226,48 @@ def viewPortfolio(username):
     if (current_user.is_authenticated): nav.register_element('top', authenticatedTopBar)
     else: nav.register_element('top', unauthenticatedTopBar)
 
-    # TODO: Implement this.
-    # TODO: Check that username actually exists. The user could enter some junk in the URL bar.
-    # return "view portfolio of {username}".format(username = username)
-    memes = get_makers_memes(username)
-    return(render_template('home.html', page_title="Memes made by {username}".format(username = username),
-                                        meme_list=memes,
-                                        maker_title=""))
+    response = usersTable.scan(FilterExpression = Attr("username").eq(username))
+    if (response['Count'] == 0): abort(404)     # A user with that name does not exist.
+
+    # Check if the current user is subscribed to this creator.
+    subscribed = False
+    if (current_user.is_authenticated):
+        response_cur = usersTable.get_item(Key = {"email": current_user.id})
+        if ('subscriptions' in response_cur['Item'] and response['Items'][0]['email'] in response_cur['Item']['subscriptions']): subscribed = True
+
+    # Get all the memes for that user.
+    return render_template('portfolio.html', page_title="Memes made by {username}".format(username = username),
+                                            meme_list=getUserMemes(response['Items'][0]['email']),
+                                            sameUser=(current_user.username == username),
+                                            subscribed=subscribed,
+                                            creatorName=username)
+
+@main.route('/portfolio', methods=['POST'])
+@login_required
+def subscribe():
+    creatorName = request.form['creator']
+    response = usersTable.scan(FilterExpression = Attr("username").eq(creatorName))
+    creator = response['Items'][0]
+    creatorID = creator['email']
+
+    # Add the creator to the subscriber's list.
+    response = usersTable.get_item(Key = {'email': current_user.id})
+    newUser = response['Item']
+    if ('subscriptions' in newUser):    # We'll add this to their existing list of ubscriptions.
+        newUser['subscriptions'].append(creatorID)
+    else:       # This is their first subscription.
+        newUser['subscriptions'] = [creatorID]
+    usersTable.put_item(Item = newUser)
+
+    # Add the subcriber to the creators's list.
+    if ('subscribers' in creator):
+        creator['subscribers'].append(current_user.id)
+    else:
+        creator['subscribers'] = [current_user.id]
+    usersTable.put_item(Item = creator)
+
+    # Return the user to the portfolio page.
+    return redirect(url_for('main.viewPortfolio', username=creatorName))
 
 #######################
 # MEME VIEWER HANDLERS.
@@ -199,7 +292,6 @@ def create_post():
     if (current_user.is_authenticated): nav.register_element('top', authenticatedTopBar)
     else: nav.register_element('top', unauthenticatedTopBar)
 
-    # TODO: Implement this.
     # Determine what was posted.
     if (("myfile" in request.form) or ("ourfile" in request.form)):
         imgURL = None
@@ -295,11 +387,11 @@ def create_post():
 ##################
 # PROFILE HANDLER.
 ##################
-
-# TODO: Determine whether we're doing this.
 @main.route('/profile')
 @login_required
 def profile():
     # Register the authenticated topbar.
     nav.register_element('top', authenticatedTopBar)
-    return render_template('profile.html', name=current_user.username)
+
+    # Grab the user's meme and return them to the client.
+    return render_template('account.html', meme_list=getUserMemes(current_user.id))

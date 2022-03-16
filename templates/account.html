@@ -1,5 +1,14 @@
 {% extends "index.html" %}
 
 {% block content %}
-<p> Account html page</p>
+<div class="page-content">
+    <div class="meme-content">
+      <h2>Your Memes</h2>
+      {% for img in meme_list %}
+      <a href="/meme/{{ img[1] }}">
+          <img src="{{ img[0] }}" class="midsizeMeme">
+      </a>
+      {% endfor %}
+    </div>
+  </div>
 {% endblock %}
