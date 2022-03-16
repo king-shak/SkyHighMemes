@@ -8,9 +8,22 @@ mock_data = [
   "https://preview.redd.it/swsqeffnidm81.jpg?width=640&crop=smart&auto=webp&s=5aa611521c339731fe1e6d1d808f5f8f15fa13c4",
   "https://i.redd.it/6s96i19r8bm81.jpg"
 ]
+
+makers_mock_data = [
+  {"name": "Marshmallowww", "subs": 23},
+  {"name": "John420", "subs": 20},
+  {"name": "CloudyWithAChanceOfMeatballs", "subs": 21}
+]
+
 # get latest/trending? memes
 def get_memes():
   return mock_data
 
 def get_meme_url(meme_id):
   return mock_data[meme_id]
+
+def get_makers():
+  return makers_mock_data
+
+def get_makers_memes(username):
+  return mock_data[3:]

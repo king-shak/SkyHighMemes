@@ -93,3 +93,6 @@ def getCDNURLForS3Object(bucketCDNDomain, objectKey):
     if (not bucketCDNDomain.endswith("/")): bucketCDNDomain += "/"
     if (objectKey.startswith("/")): objectKey = objectKey[1:]
     return bucketCDNDomain + objectKey
+
+def getKeyFromCDNURL(url):
+    return url[url.index(".net") + 5:]
