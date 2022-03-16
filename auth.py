@@ -4,6 +4,7 @@
 # IMPORTS.
 ##########
 import datetime
+import string
 
 today = datetime.date.today()
 from boto3.dynamodb.conditions import Attr
@@ -64,6 +65,8 @@ def isValidEmail(email):
     return (user.id == None)
 
 def isValidUsername(username):
+    allowed = set(string.ascii_lowercase + string.digits + '-' + '_')
+    if (not set(username).issubset(allowed)): return False
     response = usersTable.scan(FilterExpression = Attr("username").eq(username))
     return (response["Count"] == 0)
 
@@ -108,7 +111,7 @@ def signup_post():
     if ((not validEmail) or (not validUsername)):
         # Either the email or username is already in use.
         if (not validEmail): flash('Email address already in use')
-        if (not validUsername): flash('Username already exists')
+        if (not validUsername): flash('Username already exists, or contains invalid  characters (valid characters are alphanumeric ones, hyphens, and underscores).')
         return redirect(url_for('auth.signup'))
     
     # Create the new user, adding the information to the database.
