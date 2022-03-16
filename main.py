@@ -17,7 +17,7 @@ from flask_nav.elements import Navbar, View
 from flask_nav.renderers import Renderer
 from werkzeug.utils import secure_filename
 
-from manage_memes import get_meme_url, get_memes
+from manage_memes import get_meme_url, get_memes, get_makers, get_makers_memes
 from meme_maker import addTextToImage, downloadImgFromURL
 from util import retrieveBucket, retrieveTable, getCDNURLForS3Object, getKeyFromCDNURL
 
@@ -77,7 +77,7 @@ class JustDivRenderer(Renderer):
         return tags.div(title, group)
 
 # Define the authenticated and unauthenticated topbars.
-logo = tags.img(src='./static/img/SkyHigh_Memes.png', height="50", style="margin-top:-15px")
+logo = tags.img(src='/static/img/SkyHigh_Memes.png', height="50", style="margin-top:-15px")
 authenticatedTopBar = Navbar(View(logo, 'main.index'),
                             View('Home', 'main.index'),
                             View('Make a Meme', 'main.create'),
@@ -109,9 +109,11 @@ def index():
 
     # TODO: Implement this.
     memes = get_memes()
+    makers = get_makers()
     return render_template('home.html', page_title="Check out the latest memes",
                                         meme_list=memes,
-                                        maker_title="Trending Makers")
+                                        maker_title="Trending Makers",
+                                        maker_list=makers)
 
 ########################
 # SUBSCRIPTIONS HANDLER.
@@ -168,7 +170,11 @@ def viewPortfolio(username):
 
     # TODO: Implement this.
     # TODO: Check that username actually exists. The user could enter some junk in the URL bar.
-    return "view portfolio of {username}".format(username = username)
+    # return "view portfolio of {username}".format(username = username)
+    memes = get_makers_memes(username)
+    return(render_template('home.html', page_title="Memes made by {username}".format(username = username),
+                                        meme_list=memes,
+                                        maker_title=""))
 
 #######################
 # MEME VIEWER HANDLERS.

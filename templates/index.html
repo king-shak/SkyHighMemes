@@ -14,9 +14,15 @@
 {% block body %}
 <section class="hero is-primary is-fullheight">
     <div class="hero-head">
-        <nav class="navbar">
+        <nav class="navbar"">
             <div class="container">
-                <div id="navbarMenuHeroA" class="navbar-menu">
+                <a href="/">
+                    <div class="logo-container">
+                        <img src='/static/img/SkyHigh_Memes.png' style="height:75px;" alt="Sky High Memes logo">
+                        <p >Sky-High Memes</p>
+                    </div>
+                </a>
+                <div id="navbarMenuHeroA" class="navbar-menu" style="height: 50px;">
     {% block navbar %}
     {{nav.top.render(renderer='just_div_renderer')}}
     {% endblock %}
