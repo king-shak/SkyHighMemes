@@ -113,6 +113,7 @@ def listTopics():
 
 def retrieveTopic(topicARN):
     for topic in listTopics():
+        print(topic)
         if (topic.arn == topicARN):
             return topic
     return None
