@@ -13,7 +13,7 @@ from werkzeug.security import check_password_hash, generate_password_hash
 
 from main import authenticatedTopBar, unauthenticatedTopBar, nav, usersTable
 from models import User
-from util import retrieveTable
+from util import createTopic
 
 
 ########
@@ -70,11 +70,17 @@ def isValidUsername(username):
 # Creates a new user in the database. THIS WILL OVERWRITE ANY EXISTING ENTRY WITH THE SAME EMAIL.
 # You must ensure the email and username are not already in use before calling this method.
 def createUser(email, username, password):
+    # Create their SNS topic.
+    topic = createTopic("{username}-sns-topic".format(username = username))
+    topicARN = topic.arn
+
+    # Create their account into the actual DB.
     item = {
         "email": email,
         "username": username,
         "passwordHash": generate_password_hash(password, method="sha256"),
-        "joinDate": today.strftime("%b %d %Y")
+        "joinDate": today.strftime("%b %d %Y"),
+        "topicARN": topicARN
     }
     usersTable.put_item(Item = item)
     return User(usersTable, email)
