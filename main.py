@@ -272,6 +272,7 @@ def subscribe():
     subscribeToTopic(topic, 'email', newUser['email'])
 
     # Return the user to the portfolio page.
+    flash("You are now subscribed to {creatorName}! An email will be sent with a link you must click to confirm your subscription. Doing so will allow you to receive notifications when {creatorName} creates a new meme.".format(creatorName = creatorName))
     return redirect(url_for('main.viewPortfolio', username=creatorName))
 
 #######################

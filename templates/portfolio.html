@@ -2,6 +2,17 @@
 
 {% block content %}
 <div class="page-content-column">
+  <div class="page-content-row">
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+          <div class="notification is-danger" style="width: 35rem;">
+              {{ messages[0] }}
+          </div>
+      {% endif %}
+    {% endwith %}
+  </div>
+</div>
+<div class="page-content-column">
     {% if meme_list %}
     <div class="page-content-row">
       <h2 style="font-size: x-large;">{{ page_title }}</h2>
@@ -13,7 +24,7 @@
               <input type="submit" value="Subscribe" class="button" style="margin-left: 10px;">
             </form>
           {% else %}
-            <p class="maker-item" style="margin-left: 10px;">You're subscribed to {{ creatorName }}! An email will be sent with a link you must click to confirm your subscription (disregard this message if you already done so).</p>
+            <p class="maker-item" style="margin-left: 10px;">You're subscribed to {{ creatorName }}!</p>
           {% endif %}
         {% endif %}
       </div>
