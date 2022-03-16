@@ -97,7 +97,7 @@ def createTopic(name):
     :param name: The name of the topic to create.
     :return: The newly created topic.
     """
-    sns = boto3.resource("sns")
+    sns = boto3.resource("sns", region_name=REGION_NAME)
     topic = sns.create_topic(Name=name)
     return topic
 
@@ -107,7 +107,7 @@ def listTopics():
 
     :return: An iterator that yields the topics.
     """
-    sns = boto3.resource("sns")
+    sns = boto3.resource("sns", region_name=REGION_NAME)
     topics_iter = sns.topics.all()
     return topics_iter
 
