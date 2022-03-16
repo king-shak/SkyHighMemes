@@ -384,7 +384,8 @@ def create_post():
 
             # Finally, send a message out to the subscribers.
             topic = retrieveTopic(newUser['topicARN'])
-            publishMessage(topic, "{creatorName} has created a new meme! You can check it out here: {URL}".format(creatorName = newUser['username'], URL = url_for('main.viewMeme', uri = memeURI)))
+            foobarhostname = "http://skyhighmemes-env.eba-3rktkkqb.us-west-2.elasticbeanstalk.com/"
+            publishMessage(topic, "{creatorName} has created a new meme! You can check it out here: {URL}".format(creatorName = newUser['username'], URL = foobarhostname + url_for('main.viewMeme', uri = memeURI)))
 
             return redirect(url_for('main.viewMeme', uri = memeURI))
         else:
