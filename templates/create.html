@@ -28,7 +28,7 @@
     <div class="chooseImage" id="chooseImage" style="display:none;">
         <form action="/create" method="post">
             <div class="page-content-column">
-                <div class="page-content-row">
+                <div>
                 {% for image in image_list %}
                     <img src="{{ image }}" id="{{ image }}" class="smallsizeMeme" onclick="selectImage('{{image}}')">
                 {% endfor %}
