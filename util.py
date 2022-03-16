@@ -89,6 +89,69 @@ def retrieveTable(tableName):
     # If we got here, we're good to go.
     return table
 
+# Methods for dealing with SNS: https://www.learnaws.org/2021/05/05/aws-sns-boto3-guide/
+def createTopic(name):
+    """
+    Creates a notification topic.
+
+    :param name: The name of the topic to create.
+    :return: The newly created topic.
+    """
+    sns = boto3.resource("sns")
+    topic = sns.create_topic(Name=name)
+    return topic
+
+def listTopics():
+    """
+    Lists topics for the current account.
+
+    :return: An iterator that yields the topics.
+    """
+    sns = boto3.resource("sns")
+    topics_iter = sns.topics.all()
+    return topics_iter
+
+def retrieveTopic(topicARN):
+    for topic in listTopics():
+        if (topic.arn == topicARN):
+            return topic
+    return None
+
+def subscribeToTopic(topic, protocol, endpoint):
+    """
+    Subscribes an endpoint to the topic. Some endpoint types, such as email,
+    must be confirmed before their subscriptions are active. When a subscription
+    is not confirmed, its Amazon Resource Number (ARN) is set to
+    'PendingConfirmation'.
+
+    :param topic: The topic to subscribe to.
+    :param protocol: The protocol of the endpoint, such as 'sms' or 'email'.
+    :param endpoint: The endpoint that receives messages, such as a phone number
+                      or an email address.
+    :return: The newly added subscription.
+    """
+    subscription = topic.subscribe(Protocol=protocol, Endpoint=endpoint, ReturnSubscriptionArn=True)
+    return subscription
+
+def deleteSubscription(subscription):
+    """
+    Unsubscribes and deletes a subscription.
+    """
+    subscription.delete()
+
+def publishMessage(topic, message):
+    """
+    Publishes a message to a topic.
+
+    :param topic: The topic to publish to.
+    :param message: The message to publish.
+    :return: The ID of the message.
+    """
+    response = topic.publish(Message=message)
+    message_id = response['MessageId']
+    return message_id
+
+# Methods for dealing with the CDN.
 def getCDNURLForS3Object(bucketCDNDomain, objectKey):
     if (not bucketCDNDomain.endswith("/")): bucketCDNDomain += "/"
     if (objectKey.startswith("/")): objectKey = objectKey[1:]

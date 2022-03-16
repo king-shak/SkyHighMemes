@@ -22,7 +22,7 @@ from werkzeug.utils import secure_filename
 
 from manage_memes import get_meme_url, get_memes, get_makers, get_makers_memes
 from meme_maker import addTextToImage, downloadImgFromURL
-from util import retrieveBucket, retrieveTable, getCDNURLForS3Object, getKeyFromCDNURL
+from util import retrieveBucket, retrieveTable, getCDNURLForS3Object, getKeyFromCDNURL, retrieveTopic, subscribeToTopic, publishMessage
 
 ############
 # CONSTANTS.
@@ -267,6 +267,10 @@ def subscribe():
         creator['subscribers'] = [current_user.id]
     usersTable.put_item(Item = creator)
 
+    # Add the subscriber to the creators SNS topic.
+    topic = retrieveTopic(creator['topicARN'])
+    subscribeToTopic(topic, 'email', newUser['email'])
+
     # Return the user to the portfolio page.
     return redirect(url_for('main.viewPortfolio', username=creatorName))
 
@@ -377,6 +381,10 @@ def create_post():
             else:   # This is the user's first meme.
                 newUser['memes'] = [memeURI]
             usersTable.put_item(Item = newUser)
+
+            # Finally, send a message out to the subscribers.
+            topic = retrieveTopic(newUser['topicARN'])
+            publishMessage(topic, "{creatorName} has created a new meme! You can check it out here: {URL}".format(creatorName = newUser['username'], URL = url_for('main.viewMeme', uri = memeURI)))
 
             return redirect(url_for('main.viewMeme', uri = memeURI))
         else:
