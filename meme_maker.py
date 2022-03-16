@@ -55,7 +55,9 @@ def addTextToImage(imageName, text):
     #apply the image and text to a white background, including gifs
     newHeight = int(height + totalTextHeight + (2 * upperPadding))
     for frame in range(imageFrames):
-        canvasImage = Image.new('RGBA', (width, newHeight), color=(255, 255, 255))
+        mode = 'RGBA'   # PNG.
+        if (img.format == "JPEG"): mode = 'RGB'    # JPG.
+        canvasImage = Image.new(mode, (width, newHeight), color=(255, 255, 255))
         img.seek(frame)
         canvasImage.paste(img, (0, int((newHeight - height))))
         drawnImg = ImageDraw.Draw(canvasImage)

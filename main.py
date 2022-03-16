@@ -4,11 +4,13 @@
 ##########
 # IMPORTS.
 ##########
+import datetime
 from email.mime import image
+import hashlib
 import os
 import boto3
 from dominate import tags
-from flask import Blueprint, flash, redirect, render_template, request, url_for
+from flask import Blueprint, abort, flash, redirect, render_template, request, url_for
 from flask_login import current_user, login_required
 from flask_nav import Nav, register_renderer
 from flask_nav.elements import Navbar, View
@@ -26,6 +28,7 @@ BUCKET_NAME = "skyhighmemes-store"
 BUCKET_CDN_DOMAIN = "https://d1kkk6ov7aou0v.cloudfront.net"
 MEME_IMG_ACL = "public-read"
 
+USERS_TABLE_NAME = "skyhighmemes-users-table"
 MEMES_TABLE_NAME = "skyhighmemes-memes-table"
 
 ALLOWED_EXTENSIONS = {'.png', '.jpg'}
@@ -38,7 +41,8 @@ ALLOWED_EXTENSIONS = {'.png', '.jpg'}
 s3 = boto3.resource("s3")
 memesBucket = retrieveBucket(s3, BUCKET_NAME)
 
-# Grab the memes table.
+# Grab the tables.
+usersTable = retrieveTable(USERS_TABLE_NAME)
 memesTable = retrieveTable(MEMES_TABLE_NAME)
 
 #####################
@@ -127,19 +131,31 @@ def subscriptions():
 ######################
 # MEME VIEWER HANDLER.
 ######################
+def getUserMemes(userid, exclude = None):
+    response = usersTable.get_item(Key = {"email": userid})
+    allMemes = response['Item']['memes']
+    memes = []
+    for i in range(9):
+        if (i == len(allMemes)): break
+        elif (allMemes[i] == exclude): continue
+        else:
+            response = memesTable.get_item(Key = {'uri': allMemes[i]})
+            memes.append([response['Item']['url'], allMemes[i]])
+    return memes
+
 @main.route('/meme/<uri>')
 def viewMeme(uri):
     # Register the appropriate topbar.
     if (current_user.is_authenticated): nav.register_element('top', authenticatedTopBar)
     else: nav.register_element('top', unauthenticatedTopBar)
 
-    # TODO: Implement this.
-    # meme_id = request.args.get('selected_meme')
-    memes = get_memes()
-    url = memes[int(uri)-1]
+    # Grab the meme requested and other memes from the creator.
+    response = memesTable.get_item(Key = {'uri': uri})
+    if ('Item' not in response): abort(404)
+    memes = getUserMemes(response['Item']['owner'], exclude=uri)
     
-    # meme_url = get_meme_url(int(uri))
-    return(render_template('meme.html', url=url,images=memes))
+    # Return them all to the user.
+    return render_template('meme.html', url=response['Item']['url'], images=memes)
 
 ###########################
 # PORTFOLIO VIEWER HANDLER.
@@ -194,12 +210,14 @@ def create_post():
             # We're good to go - download the file.
             filename = secure_filename(file.filename)
             filepath = 'upload/{filename}'.format(filename = filename)
+            split = os.path.splitext(filepath)
+            fileKey = 'upload/{filename}'.format(filename = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S-%f") + split[1])
             file.save(filepath)
             
             # Upload the file to our bucket, build the URL for it.
-            memesBucket.upload_file(filepath, filepath, ExtraArgs = {'ACL': 'public-read'})
+            memesBucket.upload_file(filepath, fileKey, ExtraArgs = {'ACL': 'public-read'})
             os.remove(filepath)
-            imgURL = getCDNURLForS3Object(BUCKET_CDN_DOMAIN, filepath)
+            imgURL = getCDNURLForS3Object(BUCKET_CDN_DOMAIN, fileKey)
         else:   # The user has chosen an image from our selection.
             # Using one of our files.
             imgURL = request.form['memeImageUrl']
@@ -208,15 +226,14 @@ def create_post():
     elif ("generate" in request.form):
         # Grab the image URL and text.
         imgURL = request.form['imgURL']
-        print('imgURL: {imgURL}'.format(imgURL = imgURL))
-        topText = request.form['memeText']
-        print('topText: {topText}'.format(topText = topText))
+        memeText = request.form['memeText']
 
         # Create the meme.
         memeURL = None
         imgName = downloadImgFromURL(imgURL)
         if (imgName != None):
-            meme, duration = addTextToImage(imgName, topText)
+            print(imgName)
+            meme, duration = addTextToImage(imgName, memeText)
             if (meme != None):
                 if (len(meme) == 1):    # Non-GIF.
                     meme[0].save(imgName)
@@ -227,7 +244,8 @@ def create_post():
                                 loop=0,
                                 duration=duration)
                 # Upload to S3.
-                key = "memes/{imgName}".format(imgName = imgName)
+                split = os.path.splitext(imgName)
+                key = "memes/{imgName}".format(imgName = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S-%f") + split[1])
                 memesBucket.upload_file(imgName, key, ExtraArgs = {'ACL': 'public-read'})
                 os.remove(imgName)
                 memeURL = getCDNURLForS3Object(BUCKET_CDN_DOMAIN, key)
@@ -236,18 +254,35 @@ def create_post():
         else:
             raise Exception()
         
-        # TODO: Create the HTML page for this.
         return render_template('create-result.html', memeURL = memeURL)
     else:   # The final page where they view the generated meme.
+        memeURL = request.form['imgURL']
         if (request.form.get('saveToProfile')):
-            # TODO: Actually save the meme to the profile.
-            print("Saved to profile!")
+            response = usersTable.get_item(Key = {'email': current_user.id})
+            newUser = response['Item']
 
-            # TODO: Redirect to the newly created meme page.
-            return redirect(url_for('main.index'))
+            # First, create the entry in the memes table.
+            hashObj = hashlib.md5(bytes(str(datetime.datetime.now()), 'utf-8'))
+            memeURI = hashObj.hexdigest()
+            memeEntry = {
+                'uri': memeURI,     # This is the MD5 hash of the current timestamp.
+                'url': memeURL,
+                'owner': newUser['email'],
+                'likes': 0
+            }
+            response = memesTable.put_item(Item = memeEntry)
+
+            # Next, add this meme to the user's profile.
+            if ('memes' in newUser):   # We'll add this to their existing list of memes.
+                newUser['memes'].append(memeURI)
+            else:   # This is the user's first meme.
+                newUser['memes'] = [memeURI]
+            usersTable.put_item(Item = newUser)
+
+            return redirect(url_for('main.viewMeme', uri = memeURI))
         else:
             # Delete the meme from the S3 store.
-            s3.Object(BUCKET_NAME, getKeyFromCDNURL(request.form['imgURL'])).delete()
+            s3.Object(BUCKET_NAME, getKeyFromCDNURL(memeURL)).delete()
             # Redirect to the homepage.
             return redirect(url_for('main.index'))
 

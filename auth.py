@@ -11,21 +11,14 @@ from flask import Blueprint, flash, redirect, render_template, request, url_for
 from flask_login import login_required, login_user, logout_user
 from werkzeug.security import check_password_hash, generate_password_hash
 
-from main import authenticatedTopBar, unauthenticatedTopBar, nav
+from main import authenticatedTopBar, unauthenticatedTopBar, nav, usersTable
 from models import User
 from util import retrieveTable
 
-############
-# CONSTANTS.
-############
-USERS_TABLE_NAME = "skyhighmemes-users-table"
 
 ########
 # SETUP.
 ########
-
-# Setup our users table.
-usersTable = retrieveTable(USERS_TABLE_NAME)
 
 # Define the auth blueprint. This has all the event handlers for handling session management.
 auth = Blueprint('auth', __name__)

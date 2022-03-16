@@ -43,8 +43,8 @@
   </h1>
   <div class="imgs">
     {% for im in images %}
-       <a href="/meme/{{loop.index}}">
-          <img height="200" width="200" src="{{im}}">
+       <a href="/meme/{{ im[1] }}">
+          <img height="200" width="200" src="{{ im[0] }}">
        </a>
     {% endfor %}
   </div>
