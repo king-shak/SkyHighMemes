@@ -6,6 +6,7 @@
 from flask import Flask
 from flask_bootstrap import Bootstrap
 from flask_login import LoginManager
+from pathlib import Path
 
 from auth import auth as auth_blueprint
 from auth import usersTable
@@ -21,6 +22,10 @@ UPLOAD_FOLDER = 'upload/'
 ####################
 # BUILD APPLICATION.
 ####################
+
+# First, make sure our upload folder exists.
+Path(UPLOAD_FOLDER).mkdir(parents=True, exist_ok=True)
+
 application = Flask(__name__)
 Bootstrap(application)
 
