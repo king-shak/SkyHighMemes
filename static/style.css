@@ -10,10 +10,6 @@
   padding: 50px 25px 0px;
 }
 
-.imagPageContent {
-  display: initial;
-}
-
 .is-fullheight {
   display: block;
 }
@@ -52,7 +48,30 @@
   height: 250px;
 }
 
+.largesizeMeme {
+  height: 300px;
+}
+
 img {
   border-radius: 5px;
   margin: 5px;
+}
+
+.page-content {
+  display: flex;
+  padding: 50px 25px 0px;
+}
+
+.page-content-column {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  /* padding: 0px 30px 0px; */
+}
+
+.page-content-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  /* padding: 0px 30px 0px; */
 }

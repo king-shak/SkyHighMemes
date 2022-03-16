@@ -112,7 +112,7 @@ def index():
     makers = get_makers()
     return render_template('home.html', page_title="Check out the latest memes",
                                         meme_list=memes,
-                                        maker_title="Trending Makers",
+                                        maker_title="Top Makers",
                                         maker_list=makers)
 
 ########################

@@ -1,9 +1,10 @@
 {% extends "index.html" %}
 
 {% block content %}
+<h1 style=" font-size:xx-large;">Where the memes are dank</h1>
 <div class="page-content">
   <div class="meme-content">
-    <h2>{{page_title}}</h2>
+    <h2 style="font-size: x-large;">{{page_title}}</h2>
     {% if meme_list %}
     {% for img in meme_list %}
     <a href="/meme/{{loop.index}}">
@@ -13,7 +14,7 @@
     {% endif %}
   </div>
   <div class="makers-content">
-    <h2>{{maker_title}}</h2>
+    <h2 style="font-size: x-large;">{{maker_title}}</h2>
     {% for maker in maker_list %}
       <a href="/portfolio/{{maker['name']}}">
         <div class="maker-item">        
