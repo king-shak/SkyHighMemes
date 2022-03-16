@@ -12,7 +12,7 @@ mock_data = [
   "https://cdn.discordapp.com/attachments/828079037565108265/953539677451866112/unknown.png",
   "https://cdn.discordapp.com/attachments/828079037565108265/953540703827410974/unknown.png",
   "https://cdn.discordapp.com/attachments/828079037565108265/953541429572010014/unknown.png",
-  "https://c.tenor.com/Jt2hUuHic60AAAAM/denzel-washington-my-heart.gif"
+  "https://cdn.discordapp.com/attachments/828079037565108265/953541950886273044/denzel-washington-my-heart.gif"
 ]
 
 makers_mock_data = [
