@@ -15,14 +15,16 @@
   </div>
   <div class="makers-content">
     <h2 style="font-size: x-large;">{{maker_title}}</h2>
-    {% for maker in maker_list %}
-      <a href="/portfolio/{{maker['name']}}">
-        <div class="maker-item">        
-          <h2 style="text-align: left;">{{maker['name']}}</h2> 
-          <h2 style="text-align: right;">{{maker['subs']}} subs</h2> 
-        </div>
-      </a>
-    {% endfor %}
+    {% if maker_list %}
+      {% for maker in maker_list %}
+        <a href="/portfolio/{{maker['name']}}">
+          <div class="maker-item">        
+            <h2 style="text-align: left;">{{maker['name']}}</h2> 
+            <h2 style="text-align: right;">{{maker['subs']}} subs</h2> 
+          </div>
+        </a>
+      {% endfor %}
+    {% endif %}
   </div>
 </div>
 {% endblock %}

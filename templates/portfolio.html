@@ -9,7 +9,7 @@
         {% if not subscribed %}
           <form action="/portfolio" method="post">
             <input type="hidden" name="creator" value="{{ creatorName }}">
-            <input type="submit" value="Subscribe">
+            <input type="submit" value="Subscribe" class="button">
           </form>
         {% else %}
           <p>You're subscribed to {{ creatorName }}!</p>

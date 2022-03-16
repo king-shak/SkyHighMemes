@@ -4,7 +4,6 @@
 ##########
 # IMPORTS.
 ##########
-from crypt import methods
 import datetime
 from email.mime import image
 import hashlib
