@@ -1,21 +1,19 @@
 {% extends "index.html" %}
 
 {% block content %}
-<div class="imagePageContent">
-  <h2>Add Text</h2>
-  <div>
-    <div>
-      <img src="{{ memeURL }}" style="width:35rem;height:35rem"> 
-    </div>
-
-    <div>
-      <form action="/create" method="post">
-        <input type="text" name="memeText">
-        <input type="hidden" name="imgURL" value="{{ memeURL }}">
-        <input name="generate" type="submit" value="Generate">
-      </form>
-    </div>
-  </div>
+<h2 style="font-size: x-large;">Make a Meme</h2>
+<br>
+<div class="page-content-row" style="align-items: flex-start;">
+    <img src="{{ memeURL }}" class="largesizeMeme">
+    <form action="/create" method="post">
+        <div class="page-content-column" style="align-items:baseline;">
+        <h2 style="font-size: large;">Add Text</h2>
+            <textarea name="memeText" class="input" placeholder="Add Text" cols="20" style="height: 100px;" required></textarea>
+            <input type="hidden" name="imgURL" value="{{ memeURL }}">
+            <br>
+            <input name="generate" class="button" type="submit" value="Generate">
+        </div>
+    </form>
 </div>
 {% endblock %}
 
