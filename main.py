@@ -230,14 +230,16 @@ def viewPortfolio(username):
 
     # Check if the current user is subscribed to this creator.
     subscribed = False
+    sameUser = False
     if (current_user.is_authenticated):
+        sameUser = current_user.username == username
         response_cur = usersTable.get_item(Key = {"email": current_user.id})
         if ('subscriptions' in response_cur['Item'] and response['Items'][0]['email'] in response_cur['Item']['subscriptions']): subscribed = True
 
     # Get all the memes for that user.
     return render_template('portfolio.html', page_title="Memes made by {username}".format(username = username),
                                             meme_list=getUserMemes(response['Items'][0]['email']),
-                                            sameUser=(current_user.username == username),
+                                            sameUser=sameUser,
                                             subscribed=subscribed,
                                             creatorName=username)
 
