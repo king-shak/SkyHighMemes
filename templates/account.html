@@ -1,9 +1,9 @@
 {% extends "index.html" %}
 
 {% block content %}
-<div class="page-content">
-    <div class="meme-content">
-      <h2>Your Memes</h2>
+<div class="page-content-column">
+    <h2 style="font-size: x-large;">Your Memes</h2>
+    <div class="page-content-row">
       {% if meme_list %}
           {% for img in meme_list %}
           <a href="/meme/{{ img[1] }}">

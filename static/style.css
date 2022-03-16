@@ -60,6 +60,7 @@ img {
 .page-content {
   display: flex;
   padding: 50px 25px 0px;
+  justify-content: space-between;
 }
 
 .page-content-column {

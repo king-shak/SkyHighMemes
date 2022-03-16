@@ -36,18 +36,21 @@
     </div>
     {% endif %}
   </body>
-  <h1 >
+  <br>
+  <h1  style="font-size: x-large;">
     {% if images %}
     More memes
     {% endif %}
   </h1>
-  <div class="imgs">
-    {% for im in images %}
-       <a href="/meme/{{ im[1] }}">
-          <img height="200" width="200" src="{{ im[0] }}">
-       </a>
-    {% endfor %}
-    <p>See more of {{ creator_name }}'s memes <a href="/portfolio/{{ creator_name }}">here!</a></p>
+  <div class="page-content-column">
+    <div class="imgs">
+      {% for im in images %}
+        <a href="/meme/{{ im[1] }}">
+            <img class="midsizeMeme" src="{{ im[0] }}">
+        </a>
+      {% endfor %}
+      </div>
+    <p style="font-size: large;">See more of {{ creator_name }}'s memes <a href="/portfolio/{{ creator_name }}">here!</a></p>
   </div>
 </html>
 {% endblock %}
