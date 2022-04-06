@@ -1,6 +1,6 @@
 # SkyHighMemes
 
-TODO: Documentation? Screw that.
+This is the source code for SkyHighMemes!
 
 # Credential Configuration
 
